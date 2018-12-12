@@ -1,0 +1,50 @@
+#!/bin/bash
+
+[[ -n $DEBUG ]] && set -x
+
+__dirname=`which dirname`
+__basename=`which basename`
+
+export LANG=C
+
+__execpath(){
+  if [ ! -e "$1" ]; then
+    exit 1
+  fi
+  pushd `${__dirname} $1` >/dev/null 2>&1
+  [ $? -eq 1 ] && exit 1
+  _dir=`pwd`
+  popd >/dev/null 2>&1
+  echo $_dir
+}
+
+__script_dir=`__execpath $0`
+__home_dir=`${__dirname} ${__script_dir}`
+
+# set dotenv (.env)
+eval "$(cat ${__home_dir}/.env <(echo) <(declare -x))" >/dev/null 2>&1
+__tiller_namespace=${ENV}-${NAME}-system
+__kube_context=${K8S_CONTEXT}
+
+__silent=0
+if [ "x${SILENT}" = "xtrue" ]; then
+  __silent=1
+fi
+
+if [ ${__silent} -eq 0 ]; then
+
+  echo ""
+  echo "=============================="
+  echo "helm tiller namespace: ${__tiller_namespace}"
+  echo "kube context: ${__kube_context}"
+  echo "=============================="
+  echo ""
+  echo "exec command:"
+  echo "helm --kube-context ${__kube_context} --tiller-namespace ${__tiller_namespace} $@"
+  echo ""
+
+  read -p "ok? (y/N): " yn
+  case "$yn" in [yY]*) ;; *) echo -e "\nCancel :P\n" ; exit ;; esac
+fi
+
+exec helm --kube-context ${__kube_context} --tiller-namespace ${__tiller_namespace} $@

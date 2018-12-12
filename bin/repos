@@ -1,0 +1,247 @@
+#!/bin/bash
+
+export LANG=C
+
+
+# init/funcs
+__DIR_NAME=`which dirname`
+__BASE_NAME=`which basename`
+
+
+# environment variable
+_DEBUG=0
+if [ "x${DEBUG}" != "x" ]; then
+  _DEBUG=1
+fi
+
+debug() {
+  if [ ${_DEBUG} -eq 1 ]; then
+    echo "[DEBUG] $@"
+  fi
+}
+
+log() {
+  echo "[INFO ] $@"
+}
+
+err() {
+  echo "[ERROR] $@"
+}
+
+__execpath(){
+  if [ ! -e "$1" ]; then
+    return 1
+  fi
+  pushd `dirname $1` >/dev/null 2>&1
+  [ $? -eq 1 ] && exit 1
+  _dir=`pwd`
+  popd >/dev/null 2>&1
+  echo ${_dir}
+}
+__SCRIPT_DIR=`__execpath $0`
+__PROJECT_DIR=`dirname ${__SCRIPT_DIR}`
+__REPOSITORY_DIR=${__PROJECT_DIR}/repos
+
+debug "Project directory:    "${__PROJECT_DIR}
+debug "Bin directory:        "${__SCRIPT_DIR}
+debug "Repository directory: "${__REPOSITORY_DIR}
+
+# local variable
+REPOS_FILE=${__PROJECT_DIR}/conf/repos.conf
+
+mkdir -p ${__REPOSITORY_DIR} # force create directory!!
+
+# repository init
+init() {
+  pushd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  PRE_IFS=$IFS
+  IFS=$'\n'
+  # Exclude comment(#) and blank lines
+  for line in `cat ${REPOS_FILE} | grep -v '^#\|^$'`
+  do
+    _line=`echo ${line} | sed -e 's/  */ /g'`
+
+    _url=`echo ${_line} | cut -d ' ' -f 1`
+    _name=`echo ${_line} | cut -d ' ' -f 2`
+    _branch=`echo ${_line} | cut -d ' ' -f 3`
+
+    if [ -d ./${_name} ]; then
+      log "skip git clone. ${_url} ${_name} ${_branch}"
+    else
+      log "init git clone. ${_url} ${_name} ${_branch}"
+
+      git clone ${_url} ${_name}
+
+      pushd ${_name} >/dev/null 2>&1
+
+      if [ "x${_branch}" != "x" ]; then
+        log "change branch ${_branch}"
+        git checkout ${_branch}
+      else
+        log "change branch ${_branch}"
+      fi
+
+      git branch -a # print
+
+      popd >/dev/null 2>&1
+    fi
+  done
+  IFS=$PRE_IFS
+  popd ${__REPOSITORY_DIR} >/dev/null 2>&1
+}
+
+# repository remove
+clean() {
+  pushd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  PRE_IFS=$IFS
+  IFS=$'\n'
+  # Exclude comment(#) and blank lines
+  for line in `cat ${REPOS_FILE} | grep -v '^#\|^$'`
+  do
+    _line=`echo ${line} | sed -e 's/  */ /g'`
+
+    _url=`echo ${_line} | cut -d ' ' -f 1`
+    _name=`echo ${_line} | cut -d ' ' -f 2`
+    _branch=`echo ${_line} | cut -d ' ' -f 3`
+
+    if [ ! -d ${__REPOSITORY_DIR}/${_name} ]; then
+      log "skip git repository remove. ${_name}"
+    else
+      log "clean git repository remove. ${_name}"
+      rm -rf ${__REPOSITORY_DIR}/${_name}
+    fi
+  done
+  IFS=$PRE_IFS
+  popd ${__REPOSITORY_DIR} >/dev/null 2>&1
+}
+
+# repository reset
+reset() {
+  pushd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  PRE_IFS=$IFS
+  IFS=$'\n'
+  # Exclude comment(#) and blank lines
+  for line in `cat ${REPOS_FILE} | grep -v '^#\|^$'`
+  do
+    _line=`echo ${line} | sed -e 's/  */ /g'`
+
+    _url=`echo ${_line} | cut -d ' ' -f 1`
+    _name=`echo ${_line} | cut -d ' ' -f 2`
+    _branch=`echo ${_line} | cut -d ' ' -f 3`
+
+    if [ ! -d ./${_name} ]; then
+      log "skip git repository not found. ${_name}"
+    else
+      log "reset git clone. ${_url} ${_name} ${_branch}"
+
+      pushd ${_name} >/dev/null 2>&1
+
+      git fetch --all
+      git reset --hard origin/${_branch}
+
+      popd >/dev/null 2>&1
+    fi
+  done
+  IFS=$PRE_IFS
+  popd ${__REPOSITORY_DIR} >/dev/null 2>&1
+}
+
+# repository modify
+modify() {
+  pushd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  PRE_IFS=$IFS
+  IFS=$'\n'
+  # Exclude comment(#) and blank lines
+  for line in `cat ${REPOS_FILE} | grep -v '^#\|^$'`
+  do
+    _line=`echo ${line} | sed -e 's/  */ /g'`
+
+    _url=`echo ${_line} | cut -d ' ' -f 1`
+    _name=`echo ${_line} | cut -d ' ' -f 2`
+    _branch=`echo ${_line} | cut -d ' ' -f 3`
+
+    echo "========================================"
+    if [ ! -d ./${_name} ]; then
+      echo "skip repository not found. ${_name}"
+    else
+      echo "${_url} ${_name} ${_branch}"
+
+      pushd ${_name} >/dev/null 2>&1
+
+      echo
+      git status -s
+      echo
+
+      popd >/dev/null 2>&1
+    fi
+  done
+  IFS=$PRE_IFS
+  popd ${__REPOSITORY_DIR} >/dev/null 2>&1
+}
+
+# repository stauts
+status() {
+  pushd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  PRE_IFS=$IFS
+  IFS=$'\n'
+  # Exclude comment(#) and blank lines
+  for line in `cat ${REPOS_FILE} | grep -v '^#\|^$'`
+  do
+    _line=`echo ${line} | sed -e 's/  */ /g'`
+
+    _url=`echo ${_line} | cut -d ' ' -f 1`
+    _name=`echo ${_line} | cut -d ' ' -f 2`
+    _branch=`echo ${_line} | cut -d ' ' -f 3`
+
+    echo "========================================"
+    if [ ! -d ./${_name} ]; then
+      echo "skip repository not found. ${_name}"
+    else
+      echo "${_url} ${_name} ${_branch}"
+
+      pushd ${_name} >/dev/null 2>&1
+      git log --oneline --graph --decorate -n 2
+      echo
+
+      output=`git status -s`
+      if [ "x${output}" == "x" ]; then
+        echo "not modify"
+      else
+        echo "modify >>>>>>>>>>"
+        git status -s
+      fi
+
+      popd >/dev/null 2>&1
+    fi
+  done
+  IFS=$PRE_IFS
+  popd ${__REPOSITORY_DIR} >/dev/null 2>&1
+}
+
+
+usage() {
+  cat <<_EOT_
+Usage:
+  $0 [init|clean|reset|status|modify]
+Description:
+  Repository environment manager
+Options:
+  no set
+_EOT_
+  exit 2
+}
+
+# run!!
+if [ "x$1" == "xinit" ]; then
+  init
+elif [ "x$1" == "xclean" ]; then
+  clean
+elif [ "x$1" == "xreset" ]; then
+  reset
+elif [ "x$1" == "xstatus" ]; then
+  status
+elif [ "x$1" == "xmodify" ]; then
+  modify
+else
+  usage
+fi

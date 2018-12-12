@@ -1,0 +1,64 @@
+#!/bin/bash
+
+[[ -n $DEBUG ]] && set -x
+
+__dirname=`which dirname`
+__basename=`which basename`
+
+export LANG=C
+
+__execpath(){
+  if [ ! -e "$1" ]; then
+    exit 1
+  fi
+  pushd `${__dirname} $1` >/dev/null 2>&1
+  [ $? -eq 1 ] && exit 1
+  _dir=`pwd`
+  popd >/dev/null 2>&1
+  echo $_dir
+}
+
+__script_dir=`__execpath $0`
+__home_dir=`${__dirname} ${__script_dir}`
+
+# set dotenv (.env)
+eval "$(cat ${__home_dir}/.env <(echo) <(declare -x))" >/dev/null 2>&1
+__kube_config=${K8S_CONFIG}
+__kube_cluster=${K8S_CLUSTER}
+__kube_context=${K8S_CONTEXT}
+
+if [ -z "${__kube_config}" ]; then
+  __kube_config=${HOME}/.kube/config
+fi
+
+if [ -z "${__kube_cluster}" ]; then
+  echo "please set K8S_CLUSTER in .env. ex docker-for-desktop-cluster"
+  exit 1
+fi
+
+if [ -z "${__kube_context}" ]; then
+  echo "please set K8S_CONTEXT in .env. ex docker-for-desktop"
+  exit 1
+fi
+
+__silent=0
+if [ "x${SILENT}" = "xtrue" ]; then
+  __silent=1
+fi
+
+if [ ${__silent} -eq 0 ]; then
+
+  echo ""
+  echo "=============================="
+  echo "kube config: ${__kube_config}"
+  echo "kube cluster: ${__kube_cluster}"
+  echo "kube context: ${__kube_context}"
+  echo "=============================="
+  echo "exec command:"
+  echo "kubectl --kubeconfig ${__kube_config} --cluster ${__kube_cluster} --context ${__kube_context} $@"
+  echo ""
+ 
+  read -p "ok? (y/N): " yn
+  case "$yn" in [yY]*) ;; *) echo -e "\nCancel :P\n" ; exit ;; esac
+fi
+exec kubectl --kubeconfig ${__kube_config} --cluster ${__kube_cluster} --context ${__kube_context} $@
