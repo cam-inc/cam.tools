@@ -1,2 +1,2 @@
-# publictools
-🛠Public access tools
+# cam tools
+🛠Public access tools for CAM
