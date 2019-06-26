@@ -23,6 +23,7 @@ __home_dir=`${__dirname} ${__script_dir}`
 
 # set dotenv (.env)
 eval "$(cat ${__home_dir}/.env <(echo) <(declare -x))" >/dev/null 2>&1
+__env=${ENV}
 __tiller_namespace=${ENV}-${NAME}-system
 __kube_context=${K8S_CONTEXT}
 
@@ -33,6 +34,10 @@ fi
 
 if [ ${__silent} -eq 0 ]; then
 
+  echo ""
+  echo "=============================="
+  echo "ENV: ${__env}"
+  echo "=============================="
   echo ""
   echo "=============================="
   echo "helm tiller namespace: ${__tiller_namespace}"

@@ -23,6 +23,7 @@ __home_dir=`${__dirname} ${__script_dir}`
 
 # set dotenv (.env)
 eval "$(cat ${__home_dir}/.env <(echo) <(declare -x))" >/dev/null 2>&1
+__env=${ENV}
 __kube_config=${K8S_CONFIG}
 __kube_cluster=${K8S_CLUSTER}
 __kube_context=${K8S_CONTEXT}
@@ -50,6 +51,10 @@ if [ ${__silent} -eq 0 ]; then
 
   echo ""
   echo "=============================="
+  echo "ENV: ${__env}"
+  echo "=============================="
+  echo ""
+  echo "=============================="
   echo "kube config: ${__kube_config}"
   echo "kube cluster: ${__kube_cluster}"
   echo "kube context: ${__kube_context}"
@@ -57,7 +62,7 @@ if [ ${__silent} -eq 0 ]; then
   echo "exec command:"
   echo "kubectl --kubeconfig ${__kube_config} --cluster ${__kube_cluster} --context ${__kube_context} $@"
   echo ""
- 
+
   read -p "ok? (y/N): " yn
   case "$yn" in [yY]*) ;; *) echo -e "\nCancel :P\n" ; exit ;; esac
 fi
