@@ -87,7 +87,7 @@ init() {
     fi
   done
   IFS=$PRE_IFS
-  popd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  popd >/dev/null 2>&1
 }
 
 # repository remove
@@ -112,7 +112,7 @@ clean() {
     fi
   done
   IFS=$PRE_IFS
-  popd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  popd >/dev/null 2>&1
 }
 
 # repository reset
@@ -143,7 +143,7 @@ reset() {
     fi
   done
   IFS=$PRE_IFS
-  popd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  popd >/dev/null 2>&1
 }
 
 # repository modify
@@ -176,7 +176,7 @@ modify() {
     fi
   done
   IFS=$PRE_IFS
-  popd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  popd >/dev/null 2>&1
 }
 
 # repository stauts
@@ -215,7 +215,7 @@ status() {
     fi
   done
   IFS=$PRE_IFS
-  popd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  popd >/dev/null 2>&1
 }
 
 
