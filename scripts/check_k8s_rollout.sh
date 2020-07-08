@@ -27,7 +27,7 @@ while getopts "he:n:c:w:" opt; do
         e) _env=$OPTARG;;
         n) _namespace=$OPTARG;;
         c) _container=$OPTARG;;
-        c) _waittime=$OPTARG;;
+        w) _waittime=$OPTARG;;
         h) usage;;
     esac
 done
