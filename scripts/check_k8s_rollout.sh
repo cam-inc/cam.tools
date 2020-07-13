@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# ex)  ./check_rollout.sh -e local -n local-test-container-service -c test-container -w 120
+# e.g.)  ./check_k8s_rollout.sh -e local -n local-test-container-service -c test-container -w 120
 #
 export LANG=C
 
@@ -13,10 +13,10 @@ Usage:
 Description:
   $_description
 Options:
-  -e env ex) "local"
-  -n namespace ex) "local-test-container"
-  -c 対象コンテナ ex) "test-container"
-  -w 待ち時間) ex) "120"
+  -e env e.g.) "local"
+  -n namespace e.g.) "local-test-container"
+  -c 対象コンテナ e.g.) "test-container"
+  -w 待ち時間) e.g.) "120"
 _EOT_
   exit 2
 }
@@ -33,10 +33,10 @@ while getopts "he:n:c:w:" opt; do
 done
 
 
-[ "x$_env" == "x" ] && echo "[ERROR]: -e option not found." && exit 2
-[ "x$_namespace" == "x" ] && echo "[ERROR]: -n option not found." && exit 2
-[ "x$_container" == "x" ] && echo "[ERROR]: -c option not found." && exit 2
-[ "x$_waittime" == "x" ] && echo "[ERROR]: -w option not found." && exit 2
+[ "x$_env" = "x" ] && echo "[ERROR]: -e option not found." && exit 2
+[ "x$_namespace" = "x" ] && echo "[ERROR]: -n option not found." && exit 2
+[ "x$_container" = "x" ] && echo "[ERROR]: -c option not found." && exit 2
+[ "x$_waittime" = "x" ] && echo "[ERROR]: -w option not found." && exit 2
 
 echo "[INFO]: Description  : $_description"
 echo "[INFO]: Infomation:"
