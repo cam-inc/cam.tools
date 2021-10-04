@@ -51,41 +51,67 @@ REPOS_FILE=${__PROJECT_DIR}/conf/repos.conf
 
 mkdir -p ${__REPOSITORY_DIR} # force create directory!!
 
-# repository init
-init() {
+_init() {
+  _line=`echo $2 $3 $4 $5 | sed -e 's/  */ /g'`
+
+  _url=`echo ${_line} | cut -d ' ' -f 1`
+  _name=`echo ${_line} | cut -d ' ' -f 2`
+  _branch=`echo ${_line} | cut -d ' ' -f 3`
+  _depth=`echo ${_line} | cut -d ' ' -f 4`
+
+  if [ -d ./${_name} ]; then
+    log "skip git clone. ${_url} ${_name} ${_branch} ${_depth}"
+  else
+    log "init git clone. ${_url} ${_name} ${_branch} ${_depth}"
+
+    DEPTH_OPTION=""
+    if [ "x${_depth}" != "x" ]; then
+      DEPTH_OPTION="--depth ${_depth}"
+    fi
+    git clone ${DEPTH_OPTION} ${_url} ${_name}
+
+    pushd ${_name} >/dev/null 2>&1
+
+    if [ "x${_branch}" != "x" ]; then
+      log "change branch ${_branch}"
+      git checkout ${_branch}
+    else
+      log "change branch ${_branch}"
+    fi
+
+    git branch -a # print
+
+    popd >/dev/null 2>&1
+  fi
+}
+
+# repository init (Parallels)
+initParallels() {
   pushd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  # Exclude comment(#) and blank lines
   PRE_IFS=$IFS
   IFS=$'\n'
-  # Exclude comment(#) and blank lines
   for line in `cat ${REPOS_FILE} | grep -v '^#\|^$'`
   do
-    _line=`echo ${line} | sed -e 's/  */ /g'`
-
-    _url=`echo ${_line} | cut -d ' ' -f 1`
-    _name=`echo ${_line} | cut -d ' ' -f 2`
-    _branch=`echo ${_line} | cut -d ' ' -f 3`
-
-    if [ -d ./${_name} ]; then
-      log "skip git clone. ${_url} ${_name} ${_branch}"
-    else
-      log "init git clone. ${_url} ${_name} ${_branch}"
-
-      git clone ${_url} ${_name}
-
-      pushd ${_name} >/dev/null 2>&1
-
-      if [ "x${_branch}" != "x" ]; then
-        log "change branch ${_branch}"
-        git checkout ${_branch}
-      else
-        log "change branch ${_branch}"
-      fi
-
-      git branch -a # print
-
-      popd >/dev/null 2>&1
-    fi
+    ${__SCRIPT_DIR}/repos _init ${line} &
   done
+  wait
+  ret=$?
+  IFS=$PRE_IFS
+  popd >/dev/null 2>&1
+}
+
+# repository init (Sequential)
+initSequential() {
+  pushd ${__REPOSITORY_DIR} >/dev/null 2>&1
+  # Exclude comment(#) and blank lines
+  PRE_IFS=$IFS
+  IFS=$'\n'
+  for line in `cat ${REPOS_FILE} | grep -v '^#\|^$'`
+  do
+    ${__SCRIPT_DIR}/repos _init ${line}
+  done
+  ret=$?
   IFS=$PRE_IFS
   popd >/dev/null 2>&1
 }
@@ -233,15 +259,21 @@ _EOT_
 
 # run!!
 if [ "x$1" == "xinit" ]; then
-  init
+  initParallels $*
+elif [ "x$1" == "xinitinitParallels" ]; then
+  initParallels $*
+elif [ "x$1" == "xinitSequential" ]; then
+  initSequential $*
+elif [ "x$1" == "x_init" ]; then
+  _init $*
 elif [ "x$1" == "xclean" ]; then
-  clean
+  clean $*
 elif [ "x$1" == "xreset" ]; then
-  reset
+  reset $*
 elif [ "x$1" == "xstatus" ]; then
-  status
+  status $*
 elif [ "x$1" == "xmodify" ]; then
-  modify
+  modify $*
 else
   usage
 fi
