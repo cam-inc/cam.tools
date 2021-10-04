@@ -43,11 +43,11 @@ if [ ${__silent} -eq 0 ]; then
   echo "=============================="
   echo ""
   echo "exec command:"
-  echo "helm --kube-context ${__kube_context} $@"
+  echo "istioctl --context ${__kube_context} $@"
   echo ""
 
   read -p "ok? (y/N): " yn
   case "$yn" in [yY]*) ;; *) echo -e "\nCancel :P\n" ; exit ;; esac
 fi
 
-exec helm --kube-context ${__kube_context} $@
+exec istioctl --context ${__kube_context} $@
