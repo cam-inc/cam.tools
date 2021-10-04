@@ -95,7 +95,7 @@ initParallels() {
   do
     ${__SCRIPT_DIR}/repos _init ${line} &
   done
-  wait
+  wait `jobs -p`
   ret=$?
   IFS=$PRE_IFS
   popd >/dev/null 2>&1
