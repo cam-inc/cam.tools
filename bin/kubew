@@ -66,4 +66,4 @@ if [ ${__silent} -eq 0 ]; then
   read -p "ok? (y/N): " yn
   case "$yn" in [yY]*) ;; *) echo -e "\nCancel :P\n" ; exit ;; esac
 fi
-exec kubectl --kubeconfig ${__kube_config} --cluster ${__kube_cluster} --context ${__kube_context} $@
+exec kubectl --kubeconfig ${__kube_config} --cluster ${__kube_cluster} --context ${__kube_context} "$@"

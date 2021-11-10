@@ -50,4 +50,4 @@ if [ ${__silent} -eq 0 ]; then
   case "$yn" in [yY]*) ;; *) echo -e "\nCancel :P\n" ; exit ;; esac
 fi
 
-exec helm --kube-context ${__kube_context} $@
+exec helm --kube-context ${__kube_context} "$@"
