@@ -38,5 +38,4 @@ if [ ${__silent} -eq 0 ]; then
   read -p "ok? (y/N): " yn
   case "$yn" in [yY]*) ;; *) echo -e "\nCancel :P\n" ; exit ;; esac
 fi
-exec microk8s $@
-
+exec microk8s "$@"
