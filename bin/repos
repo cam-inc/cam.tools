@@ -47,7 +47,14 @@ debug "Bin directory:        "${__SCRIPT_DIR}
 debug "Repository directory: "${__REPOSITORY_DIR}
 
 # local variable
-REPOS_FILE=${__PROJECT_DIR}/conf/repos.conf
+_REPOS_FILE=${__PROJECT_DIR}/conf/repos.conf
+
+if [ "x${CAM_TOOL_REPOS_FILE}" != "x" -a -f "${CAM_TOOL_REPOS_FILE}" ]; then
+  REPOS_FILE=${CAM_TOOL_REPOS_FILE}
+else
+  REPOS_FILE=${_REPOS_FILE}
+fi
+debug "Target configure file: ${REPOS_FILE}"
 
 mkdir -p ${__REPOSITORY_DIR} # force create directory!!
 
@@ -253,6 +260,9 @@ Description:
   Repository environment manager
 Options:
   no set
+Env:
+  _DEBUG=1               debug print
+  CAM_TOOL_REPOS_FILE    Configuration file path. default) ${_REPOS_FILE}
 _EOT_
   exit 2
 }
