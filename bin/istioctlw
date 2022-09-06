@@ -21,6 +21,9 @@ __execpath(){
 __script_dir=`__execpath $0`
 __home_dir=`${__dirname} ${__script_dir}`
 
+# set export bin
+export PATH=${PATH}:${__home_dir}/bin
+
 # set dotenv (.env)
 eval "$(cat ${__home_dir}/.env <(echo) <(declare -x))" >/dev/null 2>&1
 __env=${ENV}
